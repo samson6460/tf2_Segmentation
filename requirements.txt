@@ -1,0 +1,8 @@
+tensorflow
+numpy
+Pillow
+matplotlib
+pandas
+opencv-python
+imgaug==0.4.0
+sklearn
