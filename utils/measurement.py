@@ -102,7 +102,7 @@ def get_iou(ground_truth, prediction, class_names, classifi_mode='one'):
                        classifi_mode='one')
 
 
-def create_confusion_mat(label_data,
+def create_confusion_mat(ground_truth,
                          prediction,
                          class_names,
                          groundtruth_name="groundtruth",
@@ -111,16 +111,19 @@ def create_confusion_mat(label_data,
     """Create a confusion matrix for multi-category segmentation.
 
     Args:
-        label_data: A ndarray.
+        ground_truth: A ndarray.
         prediction: A ndarray.
         class_names: A list of string,   
             corresponding names of classes.
         groundtruth_name: A string.
         prediction_name: A string.
         nothing_name: A string.
+
+    Return:
+        A pandas.Dataframe.
     """
     confus_m = pd.crosstab(
-        label_data.argmax(axis=-1).flatten(),
+        ground_truth.argmax(axis=-1).flatten(),
         prediction.argmax(axis=-1).flatten()
         )
     class_names_arr = np.array(class_names + [nothing_name])
@@ -141,7 +144,7 @@ def create_score_mat(confusion_mat):
             you can get this from `create_confusion_mat()`.
 
     Return:
-        A Pandas.Dataframe.
+        A pandas.Dataframe.
     """
     out = pd.DataFrame(index=confusion_mat.index,
                        columns=['precision',

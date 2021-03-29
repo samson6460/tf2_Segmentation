@@ -25,6 +25,9 @@ def model_predict(model, intput_tensor, classifi_mode="one", **kargs):
         classifi_mode: A string,
             Specifying the encoding method.
             Default: "one", which means one-hot encoding.
+
+    Returns:
+        prediction of one-hot encoding or binary encoding.
     """
     prediction = model.predict(intput_tensor, **kargs)
     if classifi_mode=="one":

@@ -381,6 +381,7 @@ def read_img(path, size=(512, 512), rescale=None):
     """Read images as ndarray.
 
     Args:
+        path: A string, path of images.
         size: A tuple of 2 integers,
             (heights, widths).
         rescale: A float or None,

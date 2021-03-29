@@ -59,7 +59,7 @@ def binary_be_crossentropy(ce_class_weight=1,
                            binary_weight=1,
                            alpha=0.5, beta=0.1):
     def _binary_be_crossentropy(y_true, y_pred):
-        y_pred = tf.clip_by_value(y_pred, epsilon, 1-epsilon)
+        y_pred = tf.clip_by_value(y_pred, epsilon, 1 - epsilon)
 
         class_nums = y_pred.shape[-1]//2
         B = y_true[..., :class_nums]
