@@ -1,13 +1,14 @@
 # tf2_Segmentation
 
 It's a framework of image segmentation implemented by tensorflow 2.x.
+
 There're U-Net、DeepLabV3、BESNet in this framework.
 
-U-Net: Convolutional Networks for Biomedical Image Segmentation by Olaf Ronneberger, Philipp Fischer, Thomas Brox (https://arxiv.org/abs/1505.04597).
+**U-Net**: Convolutional Networks for Biomedical Image Segmentation by Olaf Ronneberger, Philipp Fischer, Thomas Brox (https://arxiv.org/abs/1505.04597).
 
-DeepLabV3: Rethinking Atrous Convolution for Semantic Image Segmentation by Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam (https://arxiv.org/abs/1706.05587).
+**DeepLabV3**: Rethinking Atrous Convolution for Semantic Image Segmentation by Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam (https://arxiv.org/abs/1706.05587).
 
-BESNet: Boundary-Enhanced Segmentation of Cells in Histopathological Images by Hirohisa Oda, Holger R. Roth et al. (https://link.springer.com/chapter/10.1007/978-3-030-00934-2_26).
+**BESNet**: Boundary-Enhanced Segmentation of Cells in Histopathological Images by Hirohisa Oda, Holger R. Roth et al. (https://link.springer.com/chapter/10.1007/978-3-030-00934-2_26).
 
 # Table of Contents
 
@@ -15,34 +16,34 @@ BESNet: Boundary-Enhanced Segmentation of Cells in Histopathological Images by H
 - [Table of Contents](#table-of-contents)
 - [Usage](#usage)
 - [API reference](#api-reference)
-  - [<font color=#0000FF>models</font>](#font-color0000ffmodelsfont)
-    - [<font color=#FF00FF>model_predict</font> function](#font-colorff00ffmodel_predictfont-function)
-    - [<font color=#FF00FF>unet</font> function](#font-colorff00ffunetfont-function)
-    - [<font color=#FF00FF>deeplabv3</font> function](#font-colorff00ffdeeplabv3font-function)
-    - [<font color=#FF00FF>besnet</font> function](#font-colorff00ffbesnetfont-function)
-    - [<font color=#FF00FF>mbesnet</font> function](#font-colorff00ffmbesnetfont-function)
-  - [<font color=#0000FF>losses</font>](#font-color0000fflossesfont)
-    - [<font color=#FF00FF>balanced_categorical_crossentropy</font> function](#font-colorff00ffbalanced_categorical_crossentropyfont-function)
-    - [<font color=#FF00FF>balanced_binary_crossentropy</font> function](#font-colorff00ffbalanced_binary_crossentropyfont-function)
-    - [<font color=#FF00FF>categorical_be_crossentropy</font> function](#font-colorff00ffcategorical_be_crossentropyfont-function)
-    - [<font color=#FF00FF>binary_be_crossentropy</font> function](#font-colorff00ffbinary_be_crossentropyfont-function)
-    - [<font color=#FF00FF>dice_loss_func</font> function](#font-colorff00ffdice_loss_funcfont-function)
-  - [<font color=#0000FF>metrics</font>](#font-color0000ffmetricsfont)
-    - [<font color=#FF00FF>be_binary_accuracy</font> function](#font-colorff00ffbe_binary_accuracyfont-function)
-    - [<font color=#FF00FF>dice_coef_func</font> function](#font-colorff00ffdice_coef_funcfont-function)
-  - [<font color=#0000FF>utils</font>](#font-color0000ffutilsfont)
+  - [models](#models)
+    - [model_predict function](#model_predict-function)
+    - [unet function](#unet-function)
+    - [deeplabv3 function](#deeplabv3-function)
+    - [besnet function](#besnet-function)
+    - [mbesnet function](#mbesnet-function)
+  - [losses](#losses)
+    - [balanced_categorical_crossentropy function](#balanced_categorical_crossentropy-function)
+    - [balanced_binary_crossentropy function](#balanced_binary_crossentropy-function)
+    - [categorical_be_crossentropy function](#categorical_be_crossentropy-function)
+    - [binary_be_crossentropy function](#binary_be_crossentropy-function)
+    - [dice_loss_func function](#dice_loss_func-function)
+  - [metrics](#metrics)
+    - [be_binary_accuracy function](#be_binary_accuracy-function)
+    - [dice_coef_func function](#dice_coef_func-function)
+  - [utils](#utils)
     - [The Segdata_reader class](#the-segdata_reader-class)
-      - [<font color=#FF00FF>Segdata_reader</font> class](#font-colorff00ffsegdata_readerfont-class)
-      - [<font color=#FF00FF>labelme_json_to_dataset</font> method](#font-colorff00fflabelme_json_to_datasetfont-method)
-      - [<font color=#FF00FF>imglayer_to_dataset</font> method](#font-colorff00ffimglayer_to_datasetfont-method)
-    - [<font color=#FF00FF>read_img</font> function](#font-colorff00ffread_imgfont-function)
-    - [<font color=#FF00FF>vis_img_mask</font> function](#font-colorff00ffvis_img_maskfont-function)
-    - [<font color=#FF00FF>plot_history</font> function](#font-colorff00ffplot_historyfont-function)
-    - [<font color=#FF00FF>get_class_weight</font> function](#font-colorff00ffget_class_weightfont-function)
-    - [<font color=#FF00FF>get_jaccard</font> function](#font-colorff00ffget_jaccardfont-function)
-    - [<font color=#FF00FF>get_dice</font> function](#font-colorff00ffget_dicefont-function)
-    - [<font color=#FF00FF>create_confusion_mat</font> function](#font-colorff00ffcreate_confusion_matfont-function)
-    - [<font color=#FF00FF>create_score_mat</font> function](#font-colorff00ffcreate_score_matfont-function)
+      - [Segdata_reader class](#segdata_reader-class)
+      - [labelme_json_to_dataset method](#labelme_json_to_dataset-method)
+      - [imglayer_to_dataset method](#imglayer_to_dataset-method)
+    - [read_img function](#read_img-function)
+    - [vis_img_mask function](#vis_img_mask-function)
+    - [plot_history function](#plot_history-function)
+    - [get_class_weight function](#get_class_weight-function)
+    - [get_jaccard function](#get_jaccard-function)
+    - [get_dice function](#get_dice-function)
+    - [create_confusion_mat function](#create_confusion_mat-function)
+    - [create_score_mat function](#create_score_mat-function)
 
 # Usage
 
@@ -61,9 +62,9 @@ BESNet: Boundary-Enhanced Segmentation of Cells in Histopathological Images by H
 
 # API reference
 
-## <font color=#0000FF>models</font>
+## models
 
-### <font color=#FF00FF>model_predict</font> function
+### model_predict function
 ```
 tf2_Segmentation.models.model_predict(
     model, intput_tensor,
@@ -80,11 +81,12 @@ Call `model_predict()` to predict and convert the prediction from probabilities 
 Default: "one", which means one-hot encoding.
     
 **Returns**
+
 Prediction of one-hot encoding or binary encoding.
 
 ---
 
-### <font color=#FF00FF>unet</font> function
+### unet function
 ```
 tf2_Segmentation.models.unet(
     pretrained_weights=None,
@@ -93,7 +95,7 @@ tf2_Segmentation.models.unet(
     categorical_num=4,
     classifi_mode='one')
 ```
-Create U-Net network architecture.
+Create U-Net architecture.
     
 **Arguments**
 - **pretrained_weights**: A string, file path of pretrained model.
@@ -104,11 +106,12 @@ Create U-Net network architecture.
 If specified as 'one', it means that the activation function of the output layer is softmax, and the label  should be one-hot encoding.
 
 **Returns**
+
 A tf.keras Model.
 
 ---
 
-### <font color=#FF00FF>deeplabv3</font> function
+### deeplabv3 function
 ```
 tf2_Segmentation.models.deeplabv3(
     pretrained_weights='pascal_voc',
@@ -130,7 +133,7 @@ This model is available for TensorFlow only.
 - **input_tensor**: optional Keras tensor (i.e. output of `layers.Input()`) to use as image input for the model.
 - **input_shape**: shape of input image. format HxWxC PASCAL VOC model was trained on (512, 512, 3) images.
     None is allowed as shape/width.
-- **classes**: number of desired classes <font color=#FF0000>(will be deprecated)</font>.
+- **classes**: number of desired classes (will be deprecated).
     PASCAL VOC has 21 classes, Cityscapes has 19 classes.
     If number of classes not aligned with the weights used,
     last layer is initialized randomly.
@@ -151,6 +154,7 @@ This model is available for TensorFlow only.
     One of 'softmax', 'sigmoid' or None.
 
 **Returns**
+
 A tf.keras model instance.
 
 **Raises**
@@ -159,7 +163,7 @@ A tf.keras model instance.
 
 ---
 
-### <font color=#FF00FF>besnet</font> function
+### besnet function
 ```
 tf2_Segmentation.models.besnet(
     pretrained_weights=None,
@@ -181,11 +185,12 @@ Create BES-Net network architecture.
     If specified as 'one', it means that the activation function of the output layer is softmax, and the label should be one-hot encoding.
 
 **Returns**
+
 A tf.keras Model.
 
 ---
 
-### <font color=#FF00FF>mbesnet</font> function
+### mbesnet function
 ```
 tf2_Segmentation.models.mbesnet(
     pretrained_weights=None,
@@ -206,13 +211,14 @@ Create mBES-Net network architecture.
     If specified as 'one', it means that the activation function  of the output layer is softmax, and the label should be one-hot encoding.
 
 **Returns**
+
 A tf.keras Model.
 
 ------
 
-## <font color=#0000FF>losses</font>
+## losses
 
-### <font color=#FF00FF>balanced_categorical_crossentropy</font> function
+### balanced_categorical_crossentropy function
 ```
 tf2_Segmentation.losses.balanced_categorical_crossentropy(class_weight=1)
 ```
@@ -221,11 +227,12 @@ tf2_Segmentation.losses.balanced_categorical_crossentropy(class_weight=1)
 - **class_weight**: Optional `class_weight` acts as reduction weighting coefficient for the per-class losses. If a scalar is provided, then the loss is simply scaled by the given value.
 
 **Returns**
+
 A tf2 loss function.
 
 ---
 
-### <font color=#FF00FF>balanced_binary_crossentropy</font> function
+### balanced_binary_crossentropy function
 ```
 tf2_Segmentation.losses.balanced_binary_crossentropy(class_weight=1, binary_weight=1)
 ```
@@ -235,11 +242,12 @@ tf2_Segmentation.losses.balanced_binary_crossentropy(class_weight=1, binary_weig
 - **binary_weight**: Optional `binary_weight` acts as reduction weighting coefficient for the positive and negative losses.
 
 **Returns**
+
 A tf2 loss function.
 
 ---
 
-### <font color=#FF00FF>categorical_be_crossentropy</font> function
+### categorical_be_crossentropy function
 ```
 tf2_Segmentation.losses.categorical_be_crossentropy(
     ce_class_weight=1,
@@ -255,11 +263,12 @@ Loss function for BESNet.
 - **beta**: A float.
 
 **Returns**
+
 A tf2 loss function.
 
 ---
 
-### <font color=#FF00FF>binary_be_crossentropy</font> function
+### binary_be_crossentropy function
 ```
 tf2_Segmentation.losses.binary_be_crossentropy(
     ce_class_weight=1,
@@ -279,11 +288,12 @@ Loss function for BESNet.
 - **beta**: A float.
 
 **Returns**
+
 A tf2 loss function.
 
 ---
 
-### <font color=#FF00FF>dice_loss_func</font> function
+### dice_loss_func function
 ```
 tf2_Segmentation.losses.dice_loss_func(smooth=1)
 ```
@@ -297,9 +307,9 @@ A tf2 loss function.
 
 ------
 
-## <font color=#0000FF>metrics</font>
+## metrics
 
-### <font color=#FF00FF>be_binary_accuracy</font> function
+### be_binary_accuracy function
 ```
 tf2_Segmentation.metrics.be_binary_accuracy(y_true, y_pred)
 ```
@@ -310,11 +320,12 @@ Accuracy function for BESNet.
 - **y_pred**: The predicted values.
 
 **Returns**
+
 Accuracy values.
 
 ---
 
-### <font color=#FF00FF>dice_coef_func</font> function
+### dice_coef_func function
 ```
 tf2_Segmentation.metrics.dice_coef_func(smooth=1)
 ```
@@ -324,15 +335,16 @@ Dice coefficient function.
 - **smooth**: An integer.
 
 **Returns**
+
 Dice coefficient function.
 
 ------
 
-## <font color=#0000FF>utils</font>
+## utils
 
 ### The Segdata_reader class
 
-#### <font color=#FF00FF>Segdata_reader</font> class
+#### Segdata_reader class
 ```
 tf2_Segmentation.utils.Segdata_reader(
     rescale=None,
@@ -354,10 +366,11 @@ Read the images and annotations for segmentation.
 - **aug_times**
 - **file_names**: A list of string with all file names that have been read.
 
-**Return**
+**Returns**
+
 A reader instance for images and annotations.
 
-#### <font color=#FF00FF>labelme_json_to_dataset</font> method
+#### labelme_json_to_dataset method
 
 ```
 Segdata_reader.labelme_json_to_dataset(
@@ -376,9 +389,9 @@ Convert the JSON file generated by `labelme` into ndarray.
     If JSON files include images, just specify one of arg (img_path、label_path) with JSON files path.
 - **label_path**: A string, file path of JSON files.
 - **class_names**: A list of string, the class names of the category in `labelme`.
-    For example: ["g", "t", "v", "bg"], the format of the returned label is one-hot, and the channel is the class.
-    For example, the channel is [1, 0, 0, 0, 0], which means the pixel is "g"; [0, 0, 0, 0, 1] means Nothing.
-    The following format is also acceptable: ["g", ("t", "v"), "bg"], which means to treat "t" and "v" as a group.
+    For example: `["g", "t", "v", "bg"]`, the format of the returned label is one-hot, and the channel is the class.
+    For example, the channel is `[1, 0, 0, 0, 0]`, which means the pixel is `"g"`; `[0, 0, 0, 0, 1]` means Nothing.
+    The following format is also acceptable: `["g", ("t", "v"), "bg"]`, which means to treat `"t"` and `"v"` as a group.
 - **size**: A tuple of 2 integers: (heights, widths), images will be resized to this arg.
 - **padding**: A boolean, whether to fill the mark, default: True.
 - **line_thickness**: A integer, the width of the drawn line, default: 5.
@@ -388,14 +401,15 @@ Convert the JSON file generated by `labelme` into ndarray.
 - **encoding**: A string, encoding format of JSON file, default: "big5".
 - **thread_num**: An integer, specifying the number of threads to read files.
 
-**Return**
+**Returns**
+
 - A tuple of Numpy arrays: (train data, label data)
   - train data:
       shape (batches, img heights, img widths, color channels).
   - label data:
       shape (batches, mask heights, mask widths, classes).
 
-#### <font color=#FF00FF>imglayer_to_dataset</font> method
+#### imglayer_to_dataset method
 
 ```
 Segdata_reader.imglayer_to_dataset(
@@ -424,7 +438,8 @@ Convert the images and image layers into ndarray.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi', which means one-hot encode、binary encode and multi-hot encode respectively.
 - **thread_num**: An integer, specifying the number of threads to read files.
 
-**Return**
+**Returns**
+
 - A tuple of Numpy arrays: (train data, label data)
   - train data:
       shape (batches, img heights, img widths, color channels).
@@ -433,7 +448,7 @@ Convert the images and image layers into ndarray.
 
 ---
 
-### <font color=#FF00FF>read_img</font> function
+### read_img function
 
 ```
 tf2_Segmentation.utils.read_img(
@@ -449,12 +464,13 @@ Read images as ndarray
 - **rescale**: A float or None, specifying how the image value should be scaled.
     If None, no scaled.
 
-**Return**
+**Returns**
+
 A tuple of Numpy arrays (batches, img heights, img widths, color channels).
 
 ---
 
-### <font color=#FF00FF>vis_img_mask</font> function
+### vis_img_mask function
 
 ```
 tf2_Segmentation.utils.vis_img_mask(
@@ -481,12 +497,13 @@ Visualize images and annotations.
     If the label encode is one-hot, please specify as 'one'.
 - return_array: A boolean, default is False.
 
-**Return**
+**Returns**
+
 None or an image ndarray.
 
 ---
 
-### <font color=#FF00FF>plot_history</font> function
+### plot_history function
 
 ```
 tf2_Segmentation.utils.plot_history(
@@ -508,7 +525,7 @@ The historical records such as the loss value or accuracy rate returned during t
 
 ---
 
-### <font color=#FF00FF>get_class_weight</font> function
+### get_class_weight function
 
 ```
 tf2_Segmentation.utils.get_class_weight(label_data, method="alpha")
@@ -520,11 +537,12 @@ Get the weight of the category.
 - **method**: A string, one of "alpha"、"log"、"effective"、"binary".
 
 **Returns**
+
 A list containing the weight of each category.
 
 ---
 
-### <font color=#FF00FF>get_jaccard</font> function
+### get_jaccard function
 ```
 tf2_Segmentation.utils.get_jaccard(
     ground_truth,
@@ -542,11 +560,12 @@ Get Jaccard index table.
     If the label encode is one-hot, please specify as 'one'.
 
 **Returns**
+
 A pandas.Series.
 
 ---
 
-### <font color=#FF00FF>get_dice</font> function
+### get_dice function
 ```
 tf2_Segmentation.utils.get_dice(
     ground_truth,
@@ -564,11 +583,12 @@ Get Dice coefficient table.
     If the label encode is one-hot, please specify as 'one'.
 
 **Returns**
+
 A pandas.Series.
 
 ---
 
-### <font color=#FF00FF>create_confusion_mat</font> function
+### create_confusion_mat function
 ```
 tf2_Segmentation.utils.create_confusion_mat(
     ground_truth,
@@ -589,11 +609,12 @@ Create a confusion matrix for multi-category segmentation.
 - **nothing_name**: A string.
 
 **Returns**
+
 A pandas.Dataframe.
 
 ---
 
-### <font color=#FF00FF>create_score_mat</font> function
+### create_score_mat function
 ```
 tf2_Segmentation.utils.create_score_mat(confusion_mat)
 ```
@@ -602,5 +623,6 @@ Create score matrix table.
 **Arguments**
 - **confusion_mat**: pandas.Dataframe, you can get this from `create_confusion_mat()`.
 
-**Return**
+**Returns**
+
 A pandas.Dataframe.

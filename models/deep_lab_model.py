@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """ Deeplabv3+ model for tf2.
-This model is from Keras repo:
+This model modified from Keras repo:
 https://github.com/bonlime/keras-deeplab-v3-plus.git
 This model is based on TF repo:
 https://github.com/tensorflow/models/tree/master/research/deeplab

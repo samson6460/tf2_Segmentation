@@ -36,7 +36,7 @@ def unet(pretrained_weights=None,
          activation='relu',
          categorical_num=4,
          classifi_mode='one'):
-    """Create U-Net network architecture.
+    """Create U-Net architecture.
     
     Args:
         pretrained_weights: A string, 
