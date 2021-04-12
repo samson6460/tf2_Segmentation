@@ -7,6 +7,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
 import numpy as np
+import cv2
 
 
 def vis_img_mask(img, label,
@@ -18,8 +19,7 @@ def vis_img_mask(img, label,
 
     Args:
         img: A ndarry of shape(img heights, img widths, color channels).
-        label: A ndarray,
-            shape should be the same as `img`.
+        label: A ndarray of shape(mask heights, mask widths, classes).
         color: A list of color string or RGB tuple of float.
             Example of color string:
                 ['r', 'lime', 'b', 'c', 'm', 'y', 'pink', 'w'](Default).
@@ -38,6 +38,9 @@ def vis_img_mask(img, label,
     """
     color = list(map(to_rgb, color))
     nimg = np.array(img)
+    if nimg.shape != label.shape:
+        label = cv2.resize(label, (nimg.shape[1], nimg.shape[0]))
+    
     if classifi_mode == "one":
         class_num = label.shape[-1] - 1
     else:

@@ -518,7 +518,6 @@ Convert the images and image layers into ndarray.
 - **shuffle**: A boolean, default: True.
 - **seed**: An integer, random seed, default: None.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi', which means one-hot encode、binary encode and multi-hot encode respectively.
-- **thread_num**: An integer, specifying the number of threads to read files.
 
 **Returns**
 
@@ -567,7 +566,7 @@ Visualize images and annotations.
 
 **Arguments**
 - img: A ndarry of shape(img heights, img widths, color channels).
-- label: A ndarray, shape should be the same as `img`.
+- label:  A ndarray of shape(mask heights, mask widths, classes).
 - color: A list of color string or RGB tuple of float.
     Example of color string:
         `['r', 'lime', 'b', 'c', 'm', 'y', 'pink', 'w']`(Default).
