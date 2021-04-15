@@ -40,7 +40,8 @@ def vis_img_mask(img, label,
     nimg = np.array(img)
     if nimg.shape != label.shape:
         label = cv2.resize(label, (nimg.shape[1], nimg.shape[0]))
-    
+        if len(label.shape) == 2:
+            label = np.expand_dims(label, axis=-1)
     if classifi_mode == "one":
         class_num = label.shape[-1] - 1
     else:

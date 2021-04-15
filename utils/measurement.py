@@ -99,7 +99,7 @@ def get_iou(ground_truth, prediction, class_names, classifi_mode='one'):
     return get_jaccard(ground_truth,
                        prediction,
                        class_names,
-                       classifi_mode='one')
+                       classifi_mode=classifi_mode)
 
 
 def create_confusion_mat(ground_truth,
@@ -107,7 +107,8 @@ def create_confusion_mat(ground_truth,
                          class_names,
                          groundtruth_name="groundtruth",
                          prediction_name="prediction",
-                         nothing_name="nothing"):
+                         nothing_name="nothing",
+                         classifi_mode='one'):
     """Create a confusion matrix for multi-category segmentation.
 
     Args:
@@ -118,13 +119,32 @@ def create_confusion_mat(ground_truth,
         groundtruth_name: A string.
         prediction_name: A string.
         nothing_name: A string.
+        classifi_mode: A string,
+            one of 'one'、'binary'、'multi'.          
+            If the label encode is one-hot,
+            please specify as 'one'.
 
     Return:
         A pandas.Dataframe.
     """
+    if classifi_mode=="one":
+        ground_truth = ground_truth.argmax(axis=-1).flatten()
+        prediction = prediction.argmax(axis=-1).flatten()
+    else:
+        class_num = len(class_names)
+        ground_truth = np.where(
+            (ground_truth >= 0.5).all(axis=-1),
+            ground_truth.argmax(axis=-1),
+            class_num
+            ).flatten()
+        prediction = np.where(
+            (prediction >= 0.5).all(axis=-1),
+            prediction.argmax(axis=-1),
+            class_num
+            ).flatten() 
     confus_m = pd.crosstab(
-        ground_truth.argmax(axis=-1).flatten(),
-        prediction.argmax(axis=-1).flatten()
+        ground_truth,
+        prediction
         )
     class_names_arr = np.array(class_names + [nothing_name])
     confus_m.index = pd.Index(
@@ -155,10 +175,12 @@ def create_score_mat(confusion_mat):
     ptotal = confusion_mat.sum(axis=0)
     gtotal = confusion_mat.sum(axis=1)
     index_range = range(len(confusion_mat.index))
-    TP = [confusion_mat[confusion_mat.index[i]][i] for i in index_range]
+    TP = [confusion_mat[confusion_mat.index[i]][confusion_mat.columns[i]]
+          for i in index_range]
     N = gtotal.sum()
-    negative = N-gtotal
-    TN = gtotal-TP
+    negative = N - gtotal
+    FP = ptotal - TP
+    TN = negative - FP
 
     precision = TP/ptotal
     recall = TP/gtotal

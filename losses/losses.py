@@ -38,25 +38,35 @@ def categorical_be_crossentropy(ce_class_weight=1,
         class_nums = y_pred.shape[-1]//2
         B = y_true[..., :class_nums]
         p_b = y_pred[..., :class_nums]
-        G = y_true[..., class_nums:]
-        p_m = y_pred[..., class_nums:]
+
+        G = y_true[..., class_nums:-1]
+        p_m = y_pred[..., class_nums:-1]
+
+        G_bg = y_true[..., -1]
+        p_m_bg = y_pred[..., -1]
 
         ce = -tf.reduce_mean(
             tf.reduce_sum(
-            B*tf.math.log(p_b)*ce_class_weight, axis=-1))
-        b = alpha*tf.maximum(beta - p_b, 0)
+                B*tf.math.log(p_b)*ce_class_weight, axis=-1))
+
+        b = alpha*tf.maximum(beta - p_b[..., :-1], 0)
+
         bece = -tf.reduce_mean(
             tf.reduce_sum(
-            (1 + b)*G*tf.math.log(p_m)
-            *bece_class_weight, axis=-1))
-        return ce + bece
+                (1 + b)*G*tf.math.log(p_m)
+                *bece_class_weight[:-1], axis=-1))
+        bece_bg = -tf.reduce_mean(
+            G_bg*tf.math.log(p_m_bg)
+            *bece_class_weight[-1])
+
+        return ce + bece + bece_bg
     return _categorical_be_crossentropy
 
 
 def binary_be_crossentropy(ce_class_weight=1,
                            bece_class_weight=1,
                            ce_binary_weight=1,
-                           binary_weight=1,
+                           bece_binary_weight=1,
                            alpha=0.5, beta=0.1):
     def _binary_be_crossentropy(y_true, y_pred):
         y_pred = tf.clip_by_value(y_pred, epsilon, 1 - epsilon)
@@ -74,7 +84,7 @@ def binary_be_crossentropy(ce_class_weight=1,
         b = alpha*(tf.maximum(beta - p_b, 0))
         bece = -tf.reduce_mean(
             ((1 + b)*G*tf.math.log(p_m)
-            + binary_weight
+            + bece_binary_weight
             *(1 - G)*tf.math.log(1 - p_m))*bece_class_weight)
         return ce + bece
     return _binary_be_crossentropy

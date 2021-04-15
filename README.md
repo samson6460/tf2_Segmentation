@@ -678,7 +678,8 @@ tf2_Segmentation.utils.create_confusion_mat(
     class_names,
     groundtruth_name="groundtruth",
     prediction_name="prediction",
-    nothing_name="nothing")
+    nothing_name="nothing",
+    classifi_mode='one'):
 ```
 Create a confusion matrix for multi-category segmentation.
 
@@ -689,6 +690,8 @@ Create a confusion matrix for multi-category segmentation.
 - **groundtruth_name**: A string.
 - **prediction_name**: A string.
 - **nothing_name**: A string.
+- **classifi_mode**: A string, one of 'one'、'binary'、'multi'.          
+    If the label encode is one-hot, please specify as 'one'.
 
 **Returns**
 
