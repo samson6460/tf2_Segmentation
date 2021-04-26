@@ -7,6 +7,7 @@
 from .unet_model import unet
 from .deep_lab_model import deeplabv3
 from .besnet_model import besnet, mbesnet
+from .resunet_model import resunet
 
 import numpy as np
 from tensorflow.keras.utils import to_categorical

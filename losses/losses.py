@@ -51,15 +51,13 @@ def categorical_be_crossentropy(ce_class_weight=1,
 
         b = alpha*tf.maximum(beta - p_b[..., :-1], 0)
 
-        bece = -tf.reduce_mean(
-            tf.reduce_sum(
-                (1 + b)*G*tf.math.log(p_m)
-                *bece_class_weight[:-1], axis=-1))
-        bece_bg = -tf.reduce_mean(
-            G_bg*tf.math.log(p_m_bg)
-            *bece_class_weight[-1])
+        bece_fg = tf.reduce_sum(
+            (1 + b)*G*tf.math.log(p_m)
+            *bece_class_weight[:-1], axis=-1)
+        bece_bg = G_bg*tf.math.log(p_m_bg)*bece_class_weight[-1]
+        bece = -tf.reduce_mean(bece_fg + bece_bg)
 
-        return ce + bece + bece_bg
+        return ce + bece
     return _categorical_be_crossentropy
 
 

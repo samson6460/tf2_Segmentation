@@ -133,12 +133,12 @@ def create_confusion_mat(ground_truth,
     else:
         class_num = len(class_names)
         ground_truth = np.where(
-            (ground_truth >= 0.5).all(axis=-1),
+            (ground_truth >= 0.5).any(axis=-1),
             ground_truth.argmax(axis=-1),
             class_num
             ).flatten()
         prediction = np.where(
-            (prediction >= 0.5).all(axis=-1),
+            (prediction >= 0.5).any(axis=-1),
             prediction.argmax(axis=-1),
             class_num
             ).flatten() 

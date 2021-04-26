@@ -22,6 +22,7 @@ There're U-Net、DeepLabV3、BESNet in this framework.
     - [deeplabv3 function](#deeplabv3-function)
     - [besnet function](#besnet-function)
     - [mbesnet function](#mbesnet-function)
+    - [resunet function](#resunet-function)
   - [losses](#losses)
     - [balanced_categorical_crossentropy function](#balanced_categorical_crossentropy-function)
     - [balanced_binary_crossentropy function](#balanced_binary_crossentropy-function)
@@ -209,6 +210,43 @@ Create mBES-Net network architecture.
 - **categorical_num**: An integer, number of categories
 - **activation**: A string, activation function for convolutional layer.
 - **class_weight**: A list, when the category is unbalanced, you can pass in the category weight list.
+- **classifi_mode**: A string, one of 'one'、'binary'、'multi'.
+    If specified as 'one', it means that the activation function  of the output layer is softmax, and the label should be one-hot encoding.
+
+**Returns**
+
+A tf.keras Model.
+
+---
+
+### resunet function
+```
+tf2_Segmentation.models.resunet(
+    resnet_func=ResNet152,
+    input_shape=(512, 512, 3),
+    pretrained_backbone="imagenet",
+    pretrained_weights=None,
+    upskip_id=[-33, 120, 38, 4],
+    res_num_blocks=[36, 8, 3, 1],
+    categorical_num=1,
+    classifi_mode="one"):
+```
+Create ResU-Net network architecture.
+
+**Arguments**
+- **resnet_func**: A Resnet from tensorflow.keras.applications.
+    e.g., tensorflow.keras.applications.ResNet152.
+- **input_shape**: A tuple of 3 integers,
+    shape of input image.
+- **pretrained_backbone**: one of None (random initialization), 'imagenet' (pre-training on ImageNet), or the path to the weights file to be loaded.
+- **pretrained_weights**: A string, 
+    file path of pretrained model.
+- **upskip_id**: A list of integer,
+    index of skip connections from extracting path.
+- **res_num_blocks**: A list of integer.
+    number of repetitions of up-residual blocks.
+- **categorical_num**: An integer,
+    number of categories
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi'.
     If specified as 'one', it means that the activation function  of the output layer is softmax, and the label should be one-hot encoding.
 
