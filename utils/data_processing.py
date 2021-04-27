@@ -347,7 +347,8 @@ class Segdata_reader:
         
         path_list = os.listdir(file_path)
         path_list = [f for f in path_list if not f.startswith(".")]
-        path_list = [slice(slice_id)]
+        if slice_id is not None:
+            path_list = path_list[slice(*slice_id)]
         len_path_list = len(path_list)
 
         train_data = np.empty((len_path_list*self.aug_times, *size, 3))
