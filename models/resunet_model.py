@@ -102,6 +102,9 @@ def resunet(resnet_func=ResNet152,
     Returns:
         A tf.keras Model.
     """
+    if pretrained_weights is not None:
+        pretrained_backbone = None
+    
     appnet = resnet_func(
         include_top=False,
         weights=pretrained_backbone,
