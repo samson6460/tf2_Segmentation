@@ -88,23 +88,51 @@ def binary_be_crossentropy(ce_class_weight=1,
     return _binary_be_crossentropy
 
 
-def _dice_coef_func(y_true, y_pred, smooth=1):
-    ground_truth_area = tf.reduce_sum(
-        y_true, axis=(1, 2, 3))
-    prediction_area = tf.reduce_sum(
-        y_pred, axis=(1, 2, 3))
-    intersection_area = tf.reduce_sum(
-        y_true*y_pred, axis=(1, 2, 3))
-    combined_area = ground_truth_area + prediction_area
-    dice = tf.reduce_mean(
-        (2*intersection_area + smooth)/(combined_area + smooth))
+def _dice_coef_func(y_true, y_pred,
+                    smooth=1, class_weight=1,
+                    beta=1):
+    """
+    tp: True positive
+    fp: False positive
+    fn: False negative
+    """
+    tp = tf.reduce_sum(
+        y_true*y_pred, axis=(0, 1, 2))
+    fp = tf.reduce_sum(
+        y_pred, axis=(0, 1, 2)) - tp
+    fn = tf.reduce_sum(
+        y_true, axis=(0, 1, 2)) - tp
+
+    dice = (((1 + beta**2)*tp + smooth)
+            /((1 + beta**2)*tp + beta**2*fn + fp + smooth))
+    dice = tf.reduce_mean(dice*class_weight)
     return dice
 
 
-def dice_loss_func(smooth=1):
+def dice_loss_func(smooth=1, class_weight=1, beta=1):
     def dice_loss(y_true, y_pred):
         dice_coef = _dice_coef_func(
-            y_true, y_pred, smooth=smooth)
+            y_true, y_pred,
+            smooth=smooth,
+            class_weight=class_weight,
+            beta=beta)
         dice_loss = 1 - dice_coef
         return dice_loss
     return dice_loss
+
+
+def binary_dice_loss_func(smooth=1, binary_weight=1, beta=1):
+    def binary_dice_loss(y_true, y_pred):
+        pos_dice_coef = _dice_coef_func(
+            y_true, y_pred,
+            smooth=smooth,
+            beta=beta)
+        neg_dice_coef = _dice_coef_func(
+            1 - y_true, 1 - y_pred,
+            smooth=smooth,
+            beta=beta)
+        pos_dice_loss = 1 - pos_dice_coef
+        neg_dice_loss = 1 - neg_dice_coef
+        binary_dice = (pos_dice_loss + neg_dice_loss*binary_weight)/2
+        return binary_dice
+    return binary_dice_loss

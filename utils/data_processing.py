@@ -52,7 +52,8 @@ class Segdata_reader:
             If None, no scaled.
         preprocessing: A function of data preprocessing,
             (e.g. noralization, shape manipulation, etc.)
-        augmenter: A `imgaug.augmenters.meta.Sequential` instance.
+        augmenter: A `imgaug.augmenters.meta.Sequential` or 
+            `albumentations.core.composition.Compose` instance.
         aug_times: An integer,
             The default is 1, which means no augmentation.
 
@@ -77,7 +78,7 @@ class Segdata_reader:
         self.aug_times = aug_times
         self.file_names = None
 
-        if augmenter is None or type(augmenter) is not iaa.meta.Sequential:
+        if augmenter is None:
             self.aug_times = 1
 
     def labelme_json_to_dataset(
@@ -292,12 +293,20 @@ class Segdata_reader:
                 if self.augmenter is not None:
                     y = np.expand_dims(y, axis=0)
                     for aug_i in range(1, self.aug_times):
-                        img_aug_i, label_aug_i = self.augmenter(
-                            image=img,
-                            segmentation_maps=y)
-                        train_data[pos + aug_i] = img_aug_i
-                        label_data[pos + aug_i] = label_aug_i[0]
-
+                        if type(self.augmenter) is iaa.meta.Sequential:
+                            label = np.expand_dims(label, axis=0)
+                            img_aug, label_aug = self.augmenter(
+                                image=img,
+                                segmentation_maps=label)
+                            label_aug = label_aug[0]
+                        else:
+                            aug_sample = self.augmenter(
+                                image=img,
+                                mask=label)
+                            img_aug = aug_sample['image']
+                            label_aug = aug_sample['mask']
+                        train_data[pos + aug_i] = img_aug
+                        label_data[pos + aug_i] = label_aug
                 train_data[pos] = img
 
         def _read_layer(_path_list, _pos):
@@ -327,12 +336,21 @@ class Segdata_reader:
                 
                 if self.augmenter is not None:
                     for aug_i in range(1, self.aug_times):
-                        img_aug_i, label_aug_i = self.augmenter(
-                            image=img,
-                            segmentation_maps=label)
-                        train_data[pos + aug_i] = img_aug_i
-                        label_data[pos + aug_i] = label_aug_i[0]
-                train_data[pos] = img 
+                        if type(self.augmenter) is iaa.meta.Sequential:
+                            label = np.expand_dims(label, axis=0)
+                            img_aug, label_aug = self.augmenter(
+                                image=img,
+                                segmentation_maps=label)
+                            label_aug = label_aug[0]
+                        else:
+                            aug_sample = self.augmenter(
+                                image=img,
+                                mask=label)
+                            img_aug = aug_sample['image']
+                            label_aug = aug_sample['mask']
+                        train_data[pos + aug_i] = img_aug
+                        label_data[pos + aug_i] = label_aug
+                train_data[pos] = img
 
         if label_path is None:
             img_path, label_path = None, img_path
@@ -607,12 +625,20 @@ class SegDataSequence(Sequence):
                 train_data[pos] = img
                 label_data[pos] = label
             else:
-                label = np.expand_dims(label, axis=0)
-                img_aug_i, label_aug_i = self.augmenter(
-                    image=img,
-                    segmentation_maps=label)
-                train_data[pos] = img_aug_i
-                label_data[pos] = label_aug_i[0]
+                if type(self.augmenter) is iaa.meta.Sequential:
+                    label = np.expand_dims(label, axis=0)
+                    img_aug, label_aug = self.augmenter(
+                        image=img,
+                        segmentation_maps=label)
+                    label_aug = label_aug[0]
+                else:
+                    aug_sample = self.augmenter(
+                        image=img,
+                        mask=label)
+                    img_aug = aug_sample['image']
+                    label_aug = aug_sample['mask']
+                train_data[pos] = img_aug
+                label_data[pos] = label_aug
 
         def _read_json(_path_list, _pos):
             for i, name in enumerate(_path_list):

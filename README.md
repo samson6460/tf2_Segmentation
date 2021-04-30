@@ -29,9 +29,11 @@ There're U-Net、DeepLabV3、BESNet in this framework.
     - [categorical_be_crossentropy function](#categorical_be_crossentropy-function)
     - [binary_be_crossentropy function](#binary_be_crossentropy-function)
     - [dice_loss_func function](#dice_loss_func-function)
+    - [binary_dice_loss_func function](#binary_dice_loss_func-function)
   - [metrics](#metrics)
     - [be_binary_accuracy function](#be_binary_accuracy-function)
     - [dice_coef_func function](#dice_coef_func-function)
+    - [jaccard_index_func function](#jaccard_index_func-function)
   - [utils](#utils)
     - [The Segdata_reader class](#the-segdata_reader-class)
       - [Segdata_reader class](#segdata_reader-class)
@@ -337,12 +339,32 @@ A tf2 loss function.
 ```
 tf2_Segmentation.losses.dice_loss_func(smooth=1)
 ```
-Loss function for BESNet.
+Dice loss function.
 
 **Arguments**
 - **smooth**: An integer.
+- **class_weight**: A float or an array like.
+- **beta**: A float, f-score coefficient.
 
 **Returns**
+
+A tf2 loss function.
+
+---
+
+### binary_dice_loss_func function
+```
+tf2_Segmentation.losses.binary_dice_loss_func(smooth=1)
+```
+Binary dice loss function.
+
+**Arguments**
+- **smooth**: An integer.
+- **class_weight**: A float or an array like.
+- **beta**: A float, f-score coefficient.
+
+**Returns**
+
 A tf2 loss function.
 
 ------
@@ -367,16 +389,33 @@ Accuracy values.
 
 ### dice_coef_func function
 ```
-tf2_Segmentation.metrics.dice_coef_func(smooth=1)
+tf2_Segmentation.metrics.dice_coef_func(smooth=1, threshold=0.5):
 ```
 Dice coefficient function.
 
 **Arguments**
 - **smooth**: An integer.
+- **threshold**: An integer.
 
 **Returns**
 
 Dice coefficient function.
+
+---
+
+### jaccard_index_func function
+```
+tf2_Segmentation.metrics.jaccard_index_func(smooth=1)
+```
+Jaccard index function.
+
+**Arguments**
+- **smooth**: An integer.
+- **threshold**: An integer.
+
+**Returns**
+
+Jaccard index function.
 
 ------
 
@@ -399,7 +438,7 @@ Read the images and annotations for segmentation.
     If None, no scaled.
 - **preprocessing**: A function of data preprocessing,
     (e.g. noralization, shape manipulation, etc.)
-- **augmenter**: A `imgaug.augmenters.meta.Sequential` instance.
+- **augmenter**: A `imgaug.augmenters.meta.Sequential` or `albumentations.core.composition.Compose` instance.
 - **aug_times**: An integer.
   The default is 1, which means no augmentation.
 
