@@ -7,6 +7,7 @@ from tensorflow.keras.layers import Conv2DTranspose
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras.layers import LeakyReLU
 from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.layers import UpSampling2D
 from tensorflow.keras.applications import ResNet152
 
 
@@ -48,9 +49,23 @@ def Conv2DTranspose_BN_Leaky(*args, **kwargs):
         LeakyReLU(alpha=0.1))
 
 
+def UpConv2D_BN_Leaky(*args, **kwargs):
+    """Transpose Convolution2D followed by BatchNormalization and LeakyReLU."""
+    conv_kwargs = {
+        'use_bias': False,
+        'padding': 'same',
+        'kernel_initializer':'he_normal'}
+    conv_kwargs.update(kwargs)
+    return compose(
+        UpSampling2D(size = (2, 2)),
+        Conv2D(*args, **conv_kwargs),
+        BatchNormalization(),
+        LeakyReLU(alpha=0.1))
+
+
 def up_resblock_module(x, skip_connect, num_filters, num_blocks):
-    y = Conv2DTranspose_BN_Leaky(num_filters, (1, 1), 2)(x)
-    x = compose(Conv2DTranspose_BN_Leaky(num_filters//4, (1, 1), 2),
+    y = UpConv2D_BN_Leaky(num_filters, (1, 1))(x)
+    x = compose(UpConv2D_BN_Leaky(num_filters//4, (1, 1)),
                 Conv2D_BN_Leaky(num_filters//4, (3, 3)),
                 Conv2D_BN_Leaky(num_filters, (1, 1)))(x)
     x = Add()([x, y])
@@ -118,7 +133,7 @@ def resunet(resnet_func=ResNet152,
         x = up_resblock_module(x, appnet.layers[id].output,
             num_filters, num_blocks)
 
-    x = Conv2DTranspose_BN_Leaky(32, (3, 3), (2, 2))(x)
+    x = UpConv2D_BN_Leaky(32, (3, 3))(x)
     x = Concatenate()([x, appnet.layers[0].output])
     x = Conv2D_BN_Leaky(32, (3, 3))(x)
 

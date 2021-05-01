@@ -223,6 +223,26 @@ class Segdata_reader:
                        encoding,
                        slice_id,
                        thread_num, format):
+        def _imgaug_to_array(img, label, pos):
+            if self.augmenter is not None:
+                if type(self.augmenter) is iaa.meta.Sequential:
+                    label = np.expand_dims(label, axis=0)
+                    for aug_i in range(1, self.aug_times):
+                        img_aug, label_aug = self.augmenter(
+                            image=img,
+                            segmentation_maps=label)
+                        train_data[pos + aug_i] = img_aug
+                        label_data[pos + aug_i] = label_aug[0]
+                else:
+                    for aug_i in range(1, self.aug_times):
+                        aug_sample = self.augmenter(
+                            image=img,
+                            mask=label)
+                        img_aug = aug_sample['image']
+                        label_aug = aug_sample['mask']
+                        train_data[pos + aug_i] = img_aug
+                        label_data[pos + aug_i] = label_aug
+                
         def _read_json(_path_list, _pos):
             for path_i, name in enumerate(_path_list):
                 pos = (_pos + path_i)*self.aug_times
@@ -241,24 +261,16 @@ class Segdata_reader:
                     img = Image.open(os.path.join(img_path, name))
 
                 img, zoom_r = _process_img(img, size)
-
-                if classifi_mode == "one":
-                    y = np.zeros((*size, len(class_names) + 1),
-                                 dtype="int8")
-                    y[:, :, -1] = 1
-                else:
-                    y = np.zeros((*size, len(class_names)),
-                                 dtype="int8")
             
                 for data_i in range(len(data["shapes"])):
-                    label = data["shapes"][data_i]["label"]
+                    label_name = data["shapes"][data_i]["label"]
 
-                    if label in class_names:
-                        index = class_names.index(label)
+                    if label_name in class_names:
+                        index = class_names.index(label_name)
                     else:
                         for key_i, key in enumerate(class_names):
                             if isinstance(key, tuple):
-                                if label in key:
+                                if label_name in key:
                                     index = key_i
                                     break
                         else:
@@ -284,30 +296,13 @@ class Segdata_reader:
                                           (1, 0, 0), line_thickness)
 
                         label_shape = label_im[..., 0:1].astype(bool)
-                        y[..., index:index + 1][label_shape] = 1   
+                        label_data[pos][..., index:index + 1][label_shape] = 1 
                         if classifi_mode == "one":
-                            y[..., -1:][label_shape] = 0
-                
-                label_data[pos] = y
-
-                if self.augmenter is not None:
-                    y = np.expand_dims(y, axis=0)
-                    for aug_i in range(1, self.aug_times):
-                        if type(self.augmenter) is iaa.meta.Sequential:
-                            label = np.expand_dims(label, axis=0)
-                            img_aug, label_aug = self.augmenter(
-                                image=img,
-                                segmentation_maps=label)
-                            label_aug = label_aug[0]
-                        else:
-                            aug_sample = self.augmenter(
-                                image=img,
-                                mask=label)
-                            img_aug = aug_sample['image']
-                            label_aug = aug_sample['mask']
-                        train_data[pos + aug_i] = img_aug
-                        label_data[pos + aug_i] = label_aug
+                            label_data[pos][..., -1:][label_shape] = 0
+                label = label_data[pos].astype("int8")
                 train_data[pos] = img
+
+                _imgaug_to_array(img, label, pos)
 
         def _read_layer(_path_list, _pos):
             for i,  name in enumerate(_path_list):
@@ -332,25 +327,10 @@ class Segdata_reader:
                     if classifi_mode == "one":
                         label_data[pos][mask, -1] = 0
                     label_data[pos][mask, color_i] = 1
-                label = label_data[pos:pos+1].astype("int8")
-                
-                if self.augmenter is not None:
-                    for aug_i in range(1, self.aug_times):
-                        if type(self.augmenter) is iaa.meta.Sequential:
-                            label = np.expand_dims(label, axis=0)
-                            img_aug, label_aug = self.augmenter(
-                                image=img,
-                                segmentation_maps=label)
-                            label_aug = label_aug[0]
-                        else:
-                            aug_sample = self.augmenter(
-                                image=img,
-                                mask=label)
-                            img_aug = aug_sample['image']
-                            label_aug = aug_sample['mask']
-                        train_data[pos + aug_i] = img_aug
-                        label_data[pos + aug_i] = label_aug
+                label = label_data[pos].astype("int8")
                 train_data[pos] = img
+                
+                _imgaug_to_array(img, label, pos)
 
         if label_path is None:
             img_path, label_path = None, img_path
@@ -658,13 +638,7 @@ class SegDataSequence(Sequence):
 
                 img, zoom_r = _process_img(img, self.size)
 
-                if self.classifi_mode == "one":
-                    y = np.zeros((*self.size, len(self.class_names) + 1),
-                                 dtype="int8")
-                    y[..., -1] = 1
-                else:
-                    y = np.zeros((*self.size, len(self.class_names)),
-                                 dtype="int8")
+                y = label_data[pos].astype("int8")
             
                 for data_i in range(len(data["shapes"])):
                     label = data["shapes"][data_i]["label"]
@@ -719,17 +693,11 @@ class SegDataSequence(Sequence):
                         name[:name.rfind(".")] + ".jpg"))  
 
                 label, _ = _process_img(label, self.size)
-
-                if self.classifi_mode == "one":
-                    y = np.zeros((*self.size, len(self.class_names) + 1),
-                                 dtype="int8")
-                    y[..., -1] = 1
-                else:
-                    y = np.zeros((*self.size, len(self.class_names)),
-                                 dtype="int8")
                 
                 img = Image.open(os.path.join(self.img_path, name))
                 img, _ = _process_img(img, self.size)
+
+                y = label_data[pos].astype("int8")
 
                 for color_i, color in enumerate(self.class_colors):
                     mask = (label == color).all(axis=-1)
