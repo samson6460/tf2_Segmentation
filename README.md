@@ -1,5 +1,7 @@
 # tf2_Segmentation
 
+![example](https://img.shields.io/badge/Python-3.x-blue.svg) ![example](https://img.shields.io/badge/Tensorflow-2.x-yellow.svg) ![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)
+
 It's a framework of image segmentation implemented by tensorflow 2.x.
 
 There're U-Net、DeepLabV3、BESNet in this framework.
@@ -15,6 +17,8 @@ There're U-Net、DeepLabV3、BESNet in this framework.
 - [tf2_Segmentation](#tf2_segmentation)
 - [Table of Contents](#table-of-contents)
 - [Usage](#usage)
+- [Sample application](#sample-application)
+  - [CamVid](#camvid)
 - [API reference](#api-reference)
   - [models](#models)
     - [model_predict function](#model_predict-function)
@@ -63,6 +67,19 @@ There're U-Net、DeepLabV3、BESNet in this framework.
 
 3. Import tf2_Segmentation:
    ```import tf2_Segmentation```
+
+
+# Sample application
+
+## CamVid
+
+The Cambridge-driving Labeled Video Database (CamVid) is the first collection of videos with object class semantic labels, complete with metadata. The database provides ground truth labels that associate each pixel with one of 32 semantic classes.
+
+![result](images/camvid.png)
+
+[Open sample code in Colab](https://colab.research.google.com/drive/1SzpmM15YRR4hy0dKAbCsi6-FeYzGJhR2?usp=sharing)
+
+*dataset from: https://github.com/PengKiKi/camvid*
 
 
 # API reference

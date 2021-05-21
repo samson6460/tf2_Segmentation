@@ -127,11 +127,11 @@ def create_confusion_mat(ground_truth,
     Return:
         A pandas.Dataframe.
     """
+    class_num = len(class_names)
     if classifi_mode=="one":
         ground_truth = ground_truth.argmax(axis=-1).flatten()
         prediction = prediction.argmax(axis=-1).flatten()
     else:
-        class_num = len(class_names)
         ground_truth = np.where(
             (ground_truth >= 0.5).any(axis=-1),
             ground_truth.argmax(axis=-1),
@@ -141,10 +141,14 @@ def create_confusion_mat(ground_truth,
             (prediction >= 0.5).any(axis=-1),
             prediction.argmax(axis=-1),
             class_num
-            ).flatten() 
+            ).flatten()
+    categories = [i for i in range(class_num + 1)]
+    ground_truth = pd.Categorical(ground_truth, categories=categories)
+    prediction = pd.Categorical(prediction, categories=categories)
     confus_m = pd.crosstab(
         ground_truth,
-        prediction
+        prediction,
+        dropna=False
         )
     class_names_arr = np.array(class_names + [nothing_name])
     confus_m.index = pd.Index(

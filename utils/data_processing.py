@@ -231,7 +231,7 @@ class Segdata_reader:
                         img_aug, label_aug = self.augmenter(
                             image=img,
                             segmentation_maps=label)
-                        train_data[pos + aug_i] = img_aug
+                        img_data[pos + aug_i] = img_aug
                         label_data[pos + aug_i] = label_aug[0]
                 else:
                     for aug_i in range(1, self.aug_times):
@@ -240,7 +240,7 @@ class Segdata_reader:
                             mask=label)
                         img_aug = aug_sample['image']
                         label_aug = aug_sample['mask']
-                        train_data[pos + aug_i] = img_aug
+                        img_data[pos + aug_i] = img_aug
                         label_data[pos + aug_i] = label_aug
                 
         def _read_json(_path_list, _pos):
@@ -300,7 +300,7 @@ class Segdata_reader:
                         if classifi_mode == "one":
                             label_data[pos][..., -1:][label_shape] = 0
                 label = label_data[pos].astype("int8")
-                train_data[pos] = img
+                img_data[pos] = img
 
                 _imgaug_to_array(img, label, pos)
 
@@ -328,7 +328,7 @@ class Segdata_reader:
                         label_data[pos][mask, -1] = 0
                     label_data[pos][mask, color_i] = 1
                 label = label_data[pos].astype("int8")
-                train_data[pos] = img
+                img_data[pos] = img
                 
                 _imgaug_to_array(img, label, pos)
 
@@ -355,7 +355,7 @@ class Segdata_reader:
             path_list = path_list[slice(*slice_id)]
         len_path_list = len(path_list)
 
-        train_data = np.empty((len_path_list*self.aug_times, *size, 3))
+        img_data = np.empty((len_path_list*self.aug_times, *size, 3))
         if classifi_mode == "one":
             label_data = np.zeros((len_path_list*self.aug_times,
                                   *size, len(class_names) + 1))
@@ -378,25 +378,25 @@ class Segdata_reader:
             thread.join()
 
         if self.rescale is not None:
-            train_data = train_data*self.rescale
+            img_data = img_data*self.rescale
         if self.preprocessing is not None:
-            train_data = self.preprocessing(train_data)
+            img_data = self.preprocessing(img_data)
 
         path_list = self._process_paths(path_list)
 
         if shuffle:
             if seed is not None:
                 np.random.seed(seed)
-            shuffle_index = np.arange(len(train_data))
+            shuffle_index = np.arange(len(img_data))
             np.random.shuffle(shuffle_index)
-            train_data = train_data[shuffle_index]
+            img_data = img_data[shuffle_index]
             label_data = label_data[shuffle_index]
             path_list = path_list[shuffle_index]
             
         path_list = path_list.tolist()
         self.file_names = path_list
 
-        return train_data, label_data
+        return img_data, label_data
 
     def labelme_json_to_sequence(
         self, img_path=None, label_path=None,
@@ -602,7 +602,7 @@ class SegDataSequence(Sequence):
             raise IndexError("Sequence index out of range")   
         def _imgaug_to_array(img, label, pos):
             if self.augmenter is None:
-                train_data[pos] = img
+                img_data[pos] = img
                 label_data[pos] = label
             else:
                 if type(self.augmenter) is iaa.meta.Sequential:
@@ -617,7 +617,7 @@ class SegDataSequence(Sequence):
                         mask=label)
                     img_aug = aug_sample['image']
                     label_aug = aug_sample['mask']
-                train_data[pos] = img_aug
+                img_data[pos] = img_aug
                 label_data[pos] = label_aug
 
         def _read_json(_path_list, _pos):
@@ -713,7 +713,7 @@ class SegDataSequence(Sequence):
         else:
             batch_size = self.batch_size
 
-        train_data = np.empty((batch_size, *self.size, 3))
+        img_data = np.empty((batch_size, *self.size, 3))
         if self.classifi_mode == "one":
             label_data = np.zeros((batch_size,
                                   *self.size, len(self.class_names) + 1))
@@ -744,11 +744,11 @@ class SegDataSequence(Sequence):
             thread.join()
 
         if self.rescale is not None:
-            train_data = train_data*self.rescale
+            img_data = img_data*self.rescale
         if self.preprocessing is not None:
-            train_data = self.preprocessing(train_data)
+            img_data = self.preprocessing(img_data)
  
-        return  train_data, label_data
+        return img_data, label_data
 
 
 def read_img(path, size=(512, 512), rescale=None, preprocessing=None):
