@@ -39,11 +39,6 @@ from tensorflow.keras.layers import GlobalAveragePooling2D
 from tensorflow.keras.utils import get_source_inputs
 from tensorflow.keras.utils import get_file
 from tensorflow.keras.applications.imagenet_utils import preprocess_input
-import warnings
-
-warnings.filterwarnings(
-    "once",
-    category=PendingDeprecationWarning)
 
 
 WEIGHTS_PATH_X = ("https://github.com/bonlime/keras-deeplab-v3-plus"
@@ -256,11 +251,10 @@ def _inverted_res_block(inputs, expansion,
 def deeplabv3(pretrained_weights='pascal_voc',
               input_tensor=None,
               input_shape=(512, 512, 3),
-              classes=None,
               categorical_num=4,
               backbone='xception',
               OS=16, alpha=1.,
-              activation="softmax"):
+              classifi_mode="one"):
     """ Instantiates the Deeplabv3+ architecture.
 
     Optionally loads weights pre-trained
@@ -277,12 +271,12 @@ def deeplabv3(pretrained_weights='pascal_voc',
         input_shape: shape of input image. format HxWxC
             PASCAL VOC model was trained on (512, 512, 3) images.
             None is allowed as shape/width.
-        classes: number of desired classes.(will be deprecated)
-            PASCAL VOC has 21 classes, Cityscapes has 19 classes.
-            If number of classes not aligned with the weights used,
-            last layer is initialized randomly.
         categorical_num: An integer,
             number of categories without background.
+            PASCAL VOC has 20 categories,
+            Cityscapes has 18 categories.
+            If number of categories not aligned with the weights used,
+            last layer is initialized randomly.
         backbone: backbone to use. one of {'xception','mobilenetv2'}
         OS: determines input_shape/feature_extractor_output ratio.
             One of {8,16}.
@@ -298,8 +292,11 @@ def deeplabv3(pretrained_weights='pascal_voc',
                     are used at each layer.
             Used only for mobilenetv2 backbone.
             Pretrained is only available for alpha=1.
-        activation: optional activation to add to the top of the network.
-            One of 'softmax', 'sigmoid' or None.
+        classifi_mode: A string,
+            one of 'one'、'binary'、'multi'.
+            If specified as 'one', it means that the activation function
+            of the output layer is softmax, and the label 
+            should be one-hot encoding.
 
     Returns:
         A tf.keras model instance.
@@ -309,14 +306,6 @@ def deeplabv3(pretrained_weights='pascal_voc',
             backend that does not support separable convolutions.
         ValueError: in case of invalid argument for `backbone`
     """
-    if classes is not None:
-        categorical_num = classes - 1
-        warnings.warn(
-            ("`classes` will be deprecated. "
-            "Replace it with `categorical_num`. "
-            "`categorical_num` should be `classes` - 1.")
-            , PendingDeprecationWarning)
-
     if not (backbone in {'xception', 'mobilenetv2'}):
         raise ValueError('The `backbone` argument should be either '
                          '`xception`  or `mobilenetv2` ')
@@ -533,8 +522,15 @@ def deeplabv3(pretrained_weights='pascal_voc',
     else:
         last_layer_name = 'custom_logits_semantic'
 
-    x = Conv2D(categorical_num + 1, (1, 1), padding='same',
-               name=last_layer_name)(x)
+    if classifi_mode=='one':
+        x = Conv2D(categorical_num + 1, (1, 1), padding='same',
+                   name=last_layer_name)(x)
+        activation = 'softmax'
+    else:
+        x = Conv2D(categorical_num, (1, 1), padding='same',
+                   name=last_layer_name)(x)
+        activation = 'sigmoid'
+    
     size_before3 = tf.keras.backend.int_shape(img_input)
     x = Lambda(lambda xx: tf.compat.v1.image.resize(
                    xx,

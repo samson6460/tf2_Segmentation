@@ -2,13 +2,17 @@
 
 ![example](https://img.shields.io/badge/Python-3.x-blue.svg) ![example](https://img.shields.io/badge/Tensorflow-2.x-yellow.svg) ![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)
 
-It's a framework of image segmentation implemented by tensorflow 2.x.
+It's a framework of image segmentation implemented in tensorflow 2.x.
 
-There're U-Net、DeepLabV3、BESNet in this framework.
+There're U-Net、DeepLabV3+、BESNet in this framework.
 
 **U-Net**: Convolutional Networks for Biomedical Image Segmentation by Olaf Ronneberger, Philipp Fischer, Thomas Brox (https://arxiv.org/abs/1505.04597).
 
-**DeepLabV3**: Rethinking Atrous Convolution for Semantic Image Segmentation by Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam (https://arxiv.org/abs/1706.05587).
+![U-Net](images/modified_unet.png)
+
+**DeepLabV3+**: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation by Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian Schroff, Hartwig Adam (https://arxiv.org/abs/1802.02611).
+
+![DeepLabV3+](https://imgs.developpaper.com/imgs/2068779560-9ebbf4c31e6837f3_articlex.png)
 
 **BESNet**: Boundary-Enhanced Segmentation of Cells in Histopathological Images by Hirohisa Oda, Holger R. Roth et al. (https://link.springer.com/chapter/10.1007/978-3-030-00934-2_26).
 
@@ -60,7 +64,7 @@ There're U-Net、DeepLabV3、BESNet in this framework.
     - Use the command bellow in terminal to git clone:    
     ```git clone https://github.com/samson6460/tf2_Segmentation.git```
 
-    - Or just download whole files using the **[clone or download]** button in the upper right corner.
+    - Or just download whole files using the **[Code > Download ZIP]** button in the upper right corner.
     
 2. Install dependent packages: 
     ```pip install -r requirements.txt```
@@ -123,7 +127,7 @@ Create U-Net architecture.
 - **pretrained_weights**: A string, file path of pretrained model.
 - **input_shape**: A tuple of 3 integers, shape of input image.
 - **activation**: A string, activation function for convolutional layer.
-- **categorical_num**: An integer, number of categories.
+- **categorical_num**: An integer, number of categories without background.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi'.
 If specified as 'one', it means that the activation function of the output layer is softmax, and the label  should be one-hot encoding.
 
@@ -139,11 +143,10 @@ tf2_Segmentation.models.deeplabv3(
     pretrained_weights='pascal_voc',
     input_tensor=None,
     input_shape=(512, 512, 3),
-    classes=None,
     categorical_num=4,
     backbone='xception',
     OS=16, alpha=1.,
-    activation="softmax")
+    classifi_mode="one")
 ```
 Instantiates the Deeplabv3+ architecture.
 
@@ -159,8 +162,10 @@ This model is available for TensorFlow only.
     PASCAL VOC has 21 classes, Cityscapes has 19 classes.
     If number of classes not aligned with the weights used,
     last layer is initialized randomly.
-- **categorical_num**: An integer,
-    number of categories without background.
+- **categorical_num**: An integer, number of categories without background.
+    PASCAL VOC has 20 categories, Cityscapes has 18 categories.
+    If number of categories not aligned with the weights used,
+    last layer is initialized randomly.
 - **backbone**: backbone to use. one of {'xception','mobilenetv2'}
 - **OS**: determines input_shape/feature_extractor_output ratio.
     One of {8,16}.
@@ -174,6 +179,8 @@ This model is available for TensorFlow only.
     Pretrained is only available for alpha=1.
 - **activation**: optional activation to add to the top of the network.
     One of 'softmax', 'sigmoid' or None.
+- **classifi_mode**: A string, one of 'one'、'binary'、'multi'.
+    If specified as 'one', it means that the activation function of the output layer is softmax, and the label should be one-hot encoding.
 
 **Returns**
 
@@ -200,9 +207,8 @@ Create BES-Net network architecture.
 
 - **pretrained_weights**: A string, file path of pretrained model.
 - **input_shape**: A tuple of 3 integers, shape of input image.
-- **categorical_num**: An integer, number of categories without background.
 - **activation**: A string, activation function for convolutional layer.
-- **class_weight**:  A list, when the category is unbalanced, you can pass in the category weight list.
+- **categorical_num**: An integer, number of categories without background.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi'.
     If specified as 'one', it means that the activation function of the output layer is softmax, and the label should be one-hot encoding.
 
@@ -226,9 +232,8 @@ Create mBES-Net network architecture.
 **Arguments**
 - **pretrained_weights**: A string, file path of pretrained model.
 - **input_shape**: A tuple of 3 integers, shape of input image.
-- **categorical_num**: An integer, number of categories
 - **activation**: A string, activation function for convolutional layer.
-- **class_weight**: A list, when the category is unbalanced, you can pass in the category weight list.
+- **categorical_num**: An integer, number of categories without background.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi'.
     If specified as 'one', it means that the activation function  of the output layer is softmax, and the label should be one-hot encoding.
 

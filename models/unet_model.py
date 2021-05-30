@@ -43,13 +43,10 @@ def unet(pretrained_weights=None,
             file path of pretrained model.
         input_shape: A tuple of 3 integers,
             shape of input image.
-        categorical_num: An integer,
-            number of categories
         activation: A string,
             activation function for convolutional layer.
-        class_weight:  A list,
-            when the category is unbalanced, 
-            you can pass in the category weight list.
+        categorical_num:  An integer,
+            number of categories without background.
         classifi_mode: A string,
             one of 'one'、'binary'、'multi'.
             If specified as 'one', it means that the activation function
