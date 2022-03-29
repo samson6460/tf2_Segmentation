@@ -84,6 +84,7 @@ class Segdata_reader:
     def labelme_json_to_dataset(
         self, img_path=None, label_path=None,
         class_names=[], size=(512, 512),
+        allowed_shape_types=["polygon"],
         padding=True, line_thickness=5,
         shuffle=True, seed=None,
         classifi_mode="one",
@@ -113,6 +114,9 @@ class Segdata_reader:
                 which means to treat "t" and "v" as a group.
             size: A tuple of 2 integers: (heights, widths),
                 images will be resized to this arg.
+            allowed_shape_types: A list of string,
+                shape types allowed to be read, default: ["polygon"].
+                Valid strings: "polygon", "linestrip", "rectangle".
             padding: A boolean,
                 whether to fill the mark, default: True.
             line_thickness: A integer,
@@ -141,6 +145,7 @@ class Segdata_reader:
         return self._file_to_array(
             img_path=img_path, label_path=label_path,
             class_names=class_names, size=size,
+            allowed_shape_types=allowed_shape_types,
             padding=padding, line_thickness=line_thickness,
             shuffle=shuffle, seed=seed,
             classifi_mode=classifi_mode,
@@ -196,6 +201,7 @@ class Segdata_reader:
         return self._file_to_array(
             img_path=img_path, label_path=label_path,
             class_names=class_colors, size=size,
+            allowed_shape_types=None,
             padding=None, line_thickness=None,
             shuffle=shuffle, seed=seed,
             classifi_mode=classifi_mode,
@@ -217,12 +223,17 @@ class Segdata_reader:
 
     def _file_to_array(self, img_path, label_path,
                        class_names,
-                       size, padding, line_thickness,
+                       size, allowed_shape_types,
+                       padding, line_thickness,
                        shuffle, seed,
                        classifi_mode,
                        encoding,
                        slice_id,
                        thread_num, format):
+        if padding:
+            polyline_thickness = cv2.FILLED
+        else:
+            polyline_thickness = line_thickness
         def _imgaug_to_array(img, label, pos):
             if self.augmenter is not None:
                 if type(self.augmenter) is iaa.meta.Sequential:
@@ -262,43 +273,49 @@ class Segdata_reader:
 
                 img, zoom_r = _process_img(img, size)
             
-                for data_i in range(len(data["shapes"])):
-                    label_name = data["shapes"][data_i]["label"]
+                data_shapes = data['shapes']
+                for data_i in range(len(data_shapes)):
+                    label_name = data_shapes[data_i]["label"]
+                    shape_type = data_shapes[data_i]["shape_type"]
 
-                    if label_name in class_names:
-                        index = class_names.index(label_name)
-                    else:
-                        for key_i, key in enumerate(class_names):
-                            if isinstance(key, tuple):
-                                if label_name in key:
-                                    index = key_i
-                                    break
+                    if shape_type in allowed_shape_types:
+                        if label_name in class_names:
+                            index = class_names.index(label_name)
                         else:
-                            index = -1
+                            for key_i, key in enumerate(class_names):
+                                if isinstance(key, tuple):
+                                    if label_name in key:
+                                        index = key_i
+                                        break
+                            else:
+                                index = -1
 
-                    if index >= 0:
-                        point = np.array(data["shapes"][data_i]["points"])
-                        point = (point/zoom_r).astype(int)
+                        if index >= 0:
+                            points = np.array(data_shapes[data_i]["points"])
+                            points = (points/zoom_r).astype(int)
 
-                        label_im = np.zeros((*size, 1))
-                        shape_type = data["shapes"][data_i]["shape_type"]
-                        if shape_type == "linestrip":
-                            cv2.polylines(label_im,
-                                          [point], False,
-                                          (1, 0, 0), line_thickness)
-                        elif padding:
-                            cv2.drawContours(label_im,
-                                             [point],
-                                             -1, (1, 0, 0), -1)
-                        else:
-                            cv2.polylines(label_im,
-                                          [point], True,
-                                          (1, 0, 0), line_thickness)
+                            label_im = np.zeros((*size, 1), dtype=int)
+                            
+                            if shape_type == "linestrip":
+                                cv2.polylines(label_im,
+                                              [points], False,
+                                              (1, 0, 0), line_thickness)
+                            elif shape_type == "polygon":
+                                cv2.drawContours(label_im,
+                                                 [points], -1,
+                                                 (1, 0, 0), polyline_thickness)
+                            elif shape_type == "rectangle":
+                                cv2.rectangle(label_im,
+                                              points[0], points[1],
+                                              (1, 0, 0), polyline_thickness)
+                            else:
+                                raise ValueError(
+                                    "Invalid shape type: %s" % shape_type)
 
-                        label_shape = label_im[..., 0:1].astype(bool)
-                        label_data[pos][..., index:index + 1][label_shape] = 1 
-                        if classifi_mode == "one":
-                            label_data[pos][..., -1:][label_shape] = 0
+                            label_shape = label_im.astype(bool)
+                            label_data[pos][..., index:index + 1][label_shape] = 1
+                            if classifi_mode == "one":
+                                label_data[pos][..., -1:][label_shape] = 0
                 label = label_data[pos].astype("int8")
                 img_data[pos] = img
 
@@ -402,6 +419,7 @@ class Segdata_reader:
         self, img_path=None, label_path=None,
         batch_size=20,
         class_names=[], size=(512, 512),
+        allowed_shape_types=["polygon"],
         padding=True, line_thickness=5,
         shuffle=True, seed=None,
         classifi_mode="one",
@@ -431,6 +449,9 @@ class Segdata_reader:
                 which means to treat "t" and "v" as a group.
             size: A tuple of 2 integers: (heights, widths),
                 images will be resized to this arg.
+            allowed_shape_types: A list of string,
+                shape types allowed to be read, default: ["polygon"].
+                Valid strings: "polygon", "linestrip", "rectangle".
             padding: A boolean,
                 whether to fill the mark, default: True.
             line_thickness: A integer,
@@ -459,6 +480,7 @@ class Segdata_reader:
             img_path=img_path, label_path=label_path,
             batch_size=batch_size,
             class_names=class_names, size=size,
+            allowed_shape_types=allowed_shape_types,
             rescale=self.rescale,
             preprocessing=self.preprocessing,
             augmenter=self.augmenter,
@@ -521,6 +543,7 @@ class Segdata_reader:
             img_path=img_path, label_path=label_path,
             batch_size=batch_size,
             class_names=class_colors, size=size,
+            allowed_shape_types=None,
             rescale=self.rescale,
             preprocessing=self.preprocessing,
             augmenter=self.augmenter,
@@ -542,6 +565,7 @@ class SegDataSequence(Sequence):
                  batch_size=20,
                  class_names=[],
                  size=(512, 512),
+                 allowed_shape_types=["polygon"],
                  rescale=None,
                  preprocessing=None,
                  augmenter=None,
@@ -556,6 +580,7 @@ class SegDataSequence(Sequence):
         self.batch_size = batch_size
         self.class_names = class_names
         self.size = size
+        self.allowed_shape_types = allowed_shape_types
         self.rescale = rescale
         self.preprocessing = preprocessing
         self.augmenter = augmenter
@@ -568,6 +593,11 @@ class SegDataSequence(Sequence):
         self.thread_num = thread_num
         self.format = format
 
+        if padding:
+            self.polyline_thickness = cv2.FILLED
+        else:
+            self.polyline_thickness = line_thickness
+        
         if label_path is None:
             img_path, label_path = None, img_path
 
@@ -640,43 +670,49 @@ class SegDataSequence(Sequence):
 
                 y = label_data[pos].astype("int8")
             
-                for data_i in range(len(data["shapes"])):
-                    label = data["shapes"][data_i]["label"]
+                data_shapes = data["shapes"]
+                for data_i in range(len(data_shapes)):
+                    label_name = data_shapes[data_i]["label"]
+                    shape_type = data_shapes[data_i]["shape_type"]
 
-                    if label in self.class_names:
-                        index = self.class_names.index(label)
-                    else:
-                        for key_i, key in enumerate(self.class_names):
-                            if isinstance(key, tuple):
-                                if label in key:
-                                    index = key_i
-                                    break
+                    if shape_type in self.allowed_shape_types:
+                        if label_name in self.class_names:
+                            index = self.class_names.index(label_name)
                         else:
-                            index = -1
+                            for key_i, key in enumerate(self.class_names):
+                                if isinstance(key, tuple):
+                                    if label_name in key:
+                                        index = key_i
+                                        break
+                            else:
+                                index = -1
 
-                    if index >= 0:
-                        point = np.array(data["shapes"][data_i]["points"])
-                        point = (point/zoom_r).astype(int)
+                        if index >= 0:
+                            points = np.array(data_shapes[data_i]["points"])
+                            points = (points/zoom_r).astype(int)
 
-                        label_im = np.zeros((*self.size, 1))
-                        shape_type = data["shapes"][data_i]["shape_type"]
-                        if shape_type == "linestrip":
-                            cv2.polylines(label_im,
-                                          [point], False,
-                                          (1, 0, 0), self.line_thickness)
-                        elif self.padding:
-                            cv2.drawContours(label_im,
-                                             [point],
-                                             -1, (1, 0, 0), -1)
-                        else:
-                            cv2.polylines(label_im,
-                                          [point], True,
-                                          (1, 0, 0), self.line_thickness)
+                            label_im = np.zeros((*self.size, 1), dtype=int)
+                            
+                            if shape_type == "linestrip":
+                                cv2.polylines(label_im,
+                                              [points], False,
+                                              (1, 0, 0), self.line_thickness)
+                            elif shape_type == "polygon":
+                                cv2.drawContours(label_im,
+                                                 [points], -1,
+                                                 (1, 0, 0), self.polyline_thickness)
+                            elif shape_type == "rectangle":
+                                cv2.rectangle(label_im,
+                                              points[0], points[1],
+                                              (1, 0, 0), self.polyline_thickness)
+                            else:
+                                raise ValueError(
+                                    "Invalid shape type: %s" % shape_type)
 
-                        label_shape = label_im[..., 0:1].astype(bool)
-                        y[..., index:index + 1][label_shape] = 1   
-                        if self.classifi_mode == "one":
-                            y[..., -1:][label_shape] = 0
+                            label_shape = label_im.astype(bool)
+                            y[..., index:index + 1][label_shape] = 1   
+                            if self.classifi_mode == "one":
+                                y[..., -1:][label_shape] = 0
                 
                 _imgaug_to_array(img, y, pos)
 

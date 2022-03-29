@@ -14,6 +14,8 @@ def vis_img_mask(img, label,
                  color=['r', 'lime', 'b', 'c', 'm', 'y', 'pink', 'w'],
                  label_alpha=0.3,
                  classifi_mode='one',
+                 figsize=None,
+                 axis="off",
                  return_array=False):
     """Visualize images and annotations.
 
@@ -33,13 +35,22 @@ def vis_img_mask(img, label,
             one of 'one'、'binary'、'multi'.          
             If the label encode is one-hot,
             please specify as 'one'.
+        figsize: (float, float), optional, default: None,
+            width, height in inches.
+            If not provided, defaults to [6.4, 4.8].
+        axis: A boolean or a string,
+            if a boolean, turns axis lines and labels on or off.
+            If a string, possible values are:
+            https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.axis.html
         return_array: A boolean,
             Default is False.
     """
     color = list(map(to_rgb, color))
     nimg = np.array(img)
     if nimg.shape != label.shape:
-        label = cv2.resize(label, (nimg.shape[1], nimg.shape[0]))
+        label = cv2.resize(
+            label, (nimg.shape[1], nimg.shape[0]),
+            interpolation=cv2.INTER_NEAREST)
         if len(label.shape) == 2:
             label = np.expand_dims(label, axis=-1)
     if classifi_mode == "one":
@@ -57,17 +68,21 @@ def vis_img_mask(img, label,
                                 + label_alpha*color[i][1])
         nimg_B[is_the_class] = ((1 - label_alpha)*nimg_B[is_the_class]
                                 + label_alpha*color[i][2])
-    plt.imshow(nimg)
-    plt.show()
+
     if return_array:
         return nimg
+    else:
+        fig, ax = plt.subplots(1, figsize=figsize)
+        ax.imshow(nimg)
+        ax.axis(axis)
+        plt.show()
 
 
 def plot_history(history_dict, keys,
                  title=None, xyLabel=[],
                  ylim=(), size=()):
     """Draw history line graph.
-    
+    
     The historical records such as the loss value
     or accuracy rate returned during training
     can be drawn into a line graph.
