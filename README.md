@@ -12,7 +12,7 @@ There're U-Net, DeepLabV3+, BESNet, ResUNet in this framework.
 
 **DeepLabV3+**: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation by Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian Schroff, Hartwig Adam (https://arxiv.org/abs/1802.02611).
 
-![DeepLabV3+](https://imgs.developpaper.com/imgs/2068779560-9ebbf4c31e6837f3_articlex.png)
+![DeepLabV3+](images/DeepLabV3_plus.png)
 
 **BESNet**: Boundary-Enhanced Segmentation of Cells in Histopathological Images by Hirohisa Oda, Holger R. Roth et al. (https://link.springer.com/chapter/10.1007/978-3-030-00934-2_26).
 
@@ -23,45 +23,45 @@ There're U-Net, DeepLabV3+, BESNet, ResUNet in this framework.
 
 # Table of Contents
 
-- [tf2_Segmentation](#tf2_segmentation)
+- [tf2\_Segmentation](#tf2_segmentation)
 - [Table of Contents](#table-of-contents)
 - [Usage](#usage)
 - [Sample application](#sample-application)
   - [CamVid](#camvid)
 - [API reference](#api-reference)
   - [models](#models)
-    - [model_predict function](#model_predict-function)
+    - [model\_predict function](#model_predict-function)
     - [unet function](#unet-function)
     - [deeplabv3 function](#deeplabv3-function)
     - [besnet function](#besnet-function)
     - [mbesnet function](#mbesnet-function)
     - [resunet function](#resunet-function)
   - [losses](#losses)
-    - [balanced_categorical_crossentropy function](#balanced_categorical_crossentropy-function)
-    - [balanced_binary_crossentropy function](#balanced_binary_crossentropy-function)
-    - [categorical_be_crossentropy function](#categorical_be_crossentropy-function)
-    - [binary_be_crossentropy function](#binary_be_crossentropy-function)
-    - [dice_loss_func function](#dice_loss_func-function)
-    - [binary_dice_loss_func function](#binary_dice_loss_func-function)
+    - [balanced\_categorical\_crossentropy function](#balanced_categorical_crossentropy-function)
+    - [balanced\_binary\_crossentropy function](#balanced_binary_crossentropy-function)
+    - [categorical\_be\_crossentropy function](#categorical_be_crossentropy-function)
+    - [binary\_be\_crossentropy function](#binary_be_crossentropy-function)
+    - [dice\_loss\_func function](#dice_loss_func-function)
+    - [binary\_dice\_loss\_func function](#binary_dice_loss_func-function)
   - [metrics](#metrics)
-    - [be_binary_accuracy function](#be_binary_accuracy-function)
-    - [dice_coef_func function](#dice_coef_func-function)
-    - [jaccard_index_func function](#jaccard_index_func-function)
+    - [be\_binary\_accuracy function](#be_binary_accuracy-function)
+    - [dice\_coef\_func function](#dice_coef_func-function)
+    - [jaccard\_index\_func function](#jaccard_index_func-function)
   - [utils](#utils)
-    - [The Segdata_reader class](#the-segdata_reader-class)
-      - [Segdata_reader class](#segdata_reader-class)
-      - [labelme_json_to_dataset method](#labelme_json_to_dataset-method)
-      - [imglayer_to_dataset method](#imglayer_to_dataset-method)
-      - [labelme_json_to_sequence method](#labelme_json_to_sequence-method)
-      - [imglayer_to_sequence method](#imglayer_to_sequence-method)
-    - [read_img function](#read_img-function)
-    - [vis_img_mask function](#vis_img_mask-function)
-    - [plot_history function](#plot_history-function)
-    - [get_class_weight function](#get_class_weight-function)
-    - [get_jaccard function](#get_jaccard-function)
-    - [get_dice function](#get_dice-function)
-    - [create_confusion_mat function](#create_confusion_mat-function)
-    - [create_score_mat function](#create_score_mat-function)
+    - [The Segdata\_reader class](#the-segdata_reader-class)
+      - [Segdata\_reader class](#segdata_reader-class)
+      - [labelme\_json\_to\_dataset method](#labelme_json_to_dataset-method)
+      - [imglayer\_to\_dataset method](#imglayer_to_dataset-method)
+      - [labelme\_json\_to\_sequence method](#labelme_json_to_sequence-method)
+      - [imglayer\_to\_sequence method](#imglayer_to_sequence-method)
+    - [read\_img function](#read_img-function)
+    - [vis\_img\_mask function](#vis_img_mask-function)
+    - [plot\_history function](#plot_history-function)
+    - [get\_class\_weight function](#get_class_weight-function)
+    - [get\_jaccard function](#get_jaccard-function)
+    - [get\_dice function](#get_dice-function)
+    - [create\_confusion\_mat function](#create_confusion_mat-function)
+    - [create\_score\_mat function](#create_score_mat-function)
 
 # Usage
 
@@ -456,7 +456,8 @@ tf2_Segmentation.utils.Segdata_reader(
     rescale=None,
     preprocessing=None,
     augmenter=None,
-    aug_times=1)
+    reader=reader,
+    )
 ```
 Read the images and annotations for segmentation.
 
@@ -466,14 +467,13 @@ Read the images and annotations for segmentation.
 - **preprocessing**: A function of data preprocessing,
     (e.g. noralization, shape manipulation, etc.)
 - **augmenter**: A `imgaug.augmenters.meta.Sequential` or `albumentations.core.composition.Compose` instance.
-- **aug_times**: An integer.
-  The default is 1, which means no augmentation.
+- **reader**: A string, one of "cv" and "PIL".
 
 **Attributes**
 - **rescale**
 - **preprocessing**
 - **augmenter**
-- **aug_times**
+- **reader**
 - **file_names**: A list of string with all file names that have been read.
 
 **Returns**
@@ -491,7 +491,7 @@ Segdata_reader.labelme_json_to_dataset(
     shuffle=True, seed=None,
     classifi_mode="one",
     encoding="big5",
-    slice_id=None,
+    show_progress=False,
     thread_num=10)
 ```
 Convert the JSON file generated by `labelme` into ndarray.
@@ -513,16 +513,16 @@ Convert the JSON file generated by `labelme` into ndarray.
 - **seed**: An integer, random seed, default: None.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi', which means one-hot encode、binary encode and multi-hot encode respectively.
 - **encoding**: A string, encoding format of JSON file, default: "big5".
-- **slice_id**: A tuple or None, slice id of img_path.
+- **show_progress**: A boolean, whether to show reading progress of each batch.
 - **thread_num**: An integer, specifying the number of threads to read files.
 
 **Returns**
 
 - A tuple of Numpy arrays: (img data, label data)
   - img data:
-      shape (batches, img heights, img widths, color channels).
+      shape (No. of data, img height, img width, No. of color channels).
   - label data:
-      shape (batches, mask heights, mask widths, classes).
+      shape (No. of data, mask height, mask width, No. of classes).
 
 #### imglayer_to_dataset method
 
@@ -532,7 +532,7 @@ Segdata_reader.imglayer_to_dataset(
     class_colors=["r", "b"],
     size=(512, 512), shuffle=True, seed=None,
     classifi_mode="one",
-    slice_id=None,
+    show_progress=False,
     thread_num=10)
 ```
 Convert the images and image layers into ndarray.
@@ -552,16 +552,16 @@ Convert the images and image layers into ndarray.
 - **shuffle**: A boolean, default: True.
 - **seed**: An integer, random seed, default: None.
 - **classifi_mode**: A string, one of 'one'、'binary'、'multi', which means one-hot encode、binary encode and multi-hot encode respectively.
-- **slice_id**: A tuple or None, slice id of img_path.
+- **show_progress**: A boolean, whether to show reading progress of each batch.
 - **thread_num**: An integer, specifying the number of threads to read files.
 
 **Returns**
 
 - A tuple of Numpy arrays: (img data, label data)
   - img data:
-      shape (batches, img heights, img widths, color channels).
+      shape (No. of data, img height, img width, No. of color channels).
   - label data:
-      shape (batches, mask heights, mask widths, classes).
+      shape (No. of data, mask height, mask width, No. of classes).
 
 #### labelme_json_to_sequence method
 
@@ -605,9 +605,9 @@ Convert the JSON file generated by `labelme` into ndarray.
 - A tf.Sequence: 
     Sequence[i]: (img data, label data)
   - img data:
-      shape (batches, img heights, img widths, color channels).
+      shape (batch size, img height, img width, No. of color channels).
   - label data:
-      shape (batches, mask heights, mask widths, classes).
+      shape (batch size, mask height, mask width, No. of classes).
 
 #### imglayer_to_sequence method
 
@@ -645,9 +645,9 @@ Convert the images and image layers into ndarray.
 - A tf.Sequence: 
     Sequence[i]: (img data, label data)
   - img data:
-      shape (batches, img heights, img widths, color channels).
+      shape (batch size, img height, img width, No. of color channels).
   - label data:
-      shape (batches, mask heights, mask widths, classes).
+      shape (batch size, mask height, mask width, No. of classes).
 
 ---
 
